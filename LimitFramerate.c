@@ -6,6 +6,7 @@
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *playerTex;
+SDL_Rect srcR, dstR;
 int isRunning=0;
 int cnt;
 
@@ -27,7 +28,7 @@ void init(char* title, int xpos, int ypos, int width, int height, int fullscreen
 		}
 		isRunning = 1;
 	}
-	SDL_Surface* tmpSurface = IMG_Load("index.jpeg");
+	SDL_Surface* tmpSurface = IMG_Load("sprite.png");
 	playerTex = SDL_CreateTextureFromSurface(renderer,tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	/*else{
@@ -52,7 +53,7 @@ void handleEvents(){
 
 void render(){
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer,playerTex,NULL,NULL);
+	SDL_RenderCopy(renderer,playerTex,NULL,&dstR);
 	SDL_RenderPresent(renderer);
 }
 
@@ -65,6 +66,9 @@ void clean(){
 
 void update(){
 	cnt++;
+	dstR.h = 64;
+	dstR.w = 64;
+	dstR.x = cnt;
 }
 
 int main(int argc, char *args[]){
@@ -72,12 +76,23 @@ int main(int argc, char *args[]){
 		handle any user input
 		update all objects
 		render changes to display*/
-	
-	init("Title",0,0,600,400,1);
+	const int FPS = 60;
+	const int frameDelay = 1000/FPS;
+	uint32_t frameStart;
+	int frameTime;
+	init("Title",0,0,600,400,0);
 	while(isRunning==1){
+		frameStart = SDL_GetTicks();
+
 		handleEvents();
-		//update(Game);
+		update();
 		render();
+
+		frameTime = SDL_GetTicks() - frameStart;
+
+		if(frameDelay > frameTime){
+			SDL_Delay(frameDelay - frameTime);
+		} 
 	}
 	clean();
 }
